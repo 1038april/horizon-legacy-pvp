@@ -1,0 +1,193 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+[mod]
+id = "legacy_pvp"
+version = "0.1.0"
+priority = 100
+
+# Raw targets beside the hook points, so it builds on this exact Nightly only.
+[compatibility]
+horizon_revision = "ba6344a59cb9e755b730dcf02285fc0d33b97d3c"
+
+# Lowest crate that every patched function can see; holds the mod's state.
+[[module]]
+id = "runtime"
+file = "crates/horizon-client-render/src/lib.rs"
+name = "legacy_pvp"
+source = "runtime.rs"
+visibility = "pub"
+
+[[injection]]
+id = "list"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_mods"
+helper = "list.rs"
+bindings = [
+  { name = "mods", ty = "&mut Vec<crate::game::native_hooks::NativeMod>", value = "&mut *mods" },
+]
+
+[[injection]]
+id = "settings"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_settings"
+helper = "settings.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "mod_id", ty = "&str", value = "mod_id" },
+  { name = "buttons", ty = "&mut Vec<String>", value = "&mut *buttons" },
+]
+
+[[injection]]
+id = "click"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_settings_click"
+helper = "click.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "mod_id", ty = "&str", value = "mod_id" },
+  { name = "button", ty = "usize", value = "button" },
+]
+
+[[injection]]
+id = "frame"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_frame"
+helper = "frame.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+]
+
+[[injection]]
+id = "send"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::remote::Game<'_>::send"
+helper = "send.rs"
+bindings = [
+  { name = "game", ty = "&crate::game::Game<'_>", value = "self" },
+  { name = "packet", ty = "&S", value = "&packet" },
+]
+
+[[injection]]
+id = "sprint-cut"
+kind = "HEAD"
+target = "horizon_client::game::hand::Game<'_>::reset_attack_strength"
+helper = "sprint_cut.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+]
+
+[[injection]]
+id = "mob-hit"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::Game<'_>::mob_hit"
+helper = "mob_hit.rs"
+bindings = [
+  { name = "game", ty = "&Game<'_>", value = "self" },
+]
+
+[[injection]]
+id = "raise-sword"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::shield::Game<'_>::raise_shield"
+helper = "raise_sword.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "slot", ty = "usize", value = "slot" },
+]
+
+[[injection]]
+id = "sword-held"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::remote::Game<'_>::held_until_released"
+helper = "sword_held.rs"
+bindings = [
+  { name = "stack", ty = "&ItemStack", value = "stack" },
+]
+
+[[injection]]
+id = "sword-has-use"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::remote::item_has_use"
+helper = "sword_has_use.rs"
+bindings = [
+  { name = "info", ty = "&horizon_client::items::ItemInfo", value = "info" },
+]
+
+[[injection]]
+id = "item-used"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::first_person::HandHeights::item_used"
+helper = "item_used.rs"
+
+[[injection]]
+id = "item-pose"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::first_person::item_pose"
+helper = "item_pose.rs"
+bindings = [
+  { name = "left", ty = "bool", value = "left" },
+  { name = "inverse_height", ty = "f32", value = "inverse_height" },
+  { name = "attack", ty = "f32", value = "attack" },
+  { name = "pose", ty = "&ItemPose", value = "&pose" },
+]
+
+[[injection]]
+id = "swap-scale"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::attack_strength::AttackStrength::swap_scale"
+helper = "swap_scale.rs"
+
+[[injection]]
+id = "dimensions"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::pose::Pose::dimensions"
+helper = "dimensions.rs"
+bindings = [
+  { name = "pose", ty = "Pose", value = "self" },
+  { name = "scale", ty = "f32", value = "scale" },
+]
+
+[[injection]]
+id = "hurt-tilt"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::health::PlayerHealth::animate_hurt_dir"
+helper = "hurt_tilt.rs"
+bindings = [
+  { name = "health", ty = "&mut PlayerHealth", value = "&mut *self" },
+]
+
+[[injection]]
+id = "crosshair"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client_render::hud_layout::crosshair"
+helper = "crosshair.rs"
+bindings = [
+  { name = "w", ty = "i32", value = "w" },
+  { name = "h", ty = "i32", value = "h" },
+  { name = "attack", ty = "Option<f32>", value = "attack" },
+]
+
+[[injection]]
+id = "hotbar"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client_render::hud_layout::hotbar"
+helper = "hotbar.rs"
+bindings = [
+  { name = "w", ty = "i32", value = "w" },
+  { name = "h", ty = "i32", value = "h" },
+  { name = "i", ty = "&HotbarInputs", value = "i" },
+]

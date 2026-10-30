@@ -1,0 +1,13 @@
+[package]
+name = "horizon-mod-legacy-pvp"
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+publish = false
+description = "A Horizon native mod: the client behaves as the 1.8.9 client does on 1.8 servers."
+
+# The mod's logic and its tests: the same file the bundle adds to the game.
+[lib]
+path = "mixins/legacy-pvp/runtime.rs"
+
+[workspace]
